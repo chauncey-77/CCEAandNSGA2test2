@@ -10,8 +10,8 @@
 
 using namespace std;
 
-const double LOWBOUND = 0;
-const double UPPBOUND = 1;
+const double LOWBOUND = 0;   //自变量的取值范围（下限）
+const double UPPBOUND = 1;   //自变量的取值范围（上限）
 const int F1_NVAR = 1;
 const int F2_NVAR = 29;
 const int IN_POP_SIZE = 100;
