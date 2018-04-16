@@ -199,7 +199,7 @@ int main()
 		}
 		addTmpPopToResPop();
 	}
-	if (RES_POP.size() > OUT_POP_SIZE)
+	if (RES_POP.size() > OUT_POP_SIZE)  //选择出距离较大的
 	{
 		double *dis = new double[RES_POP.size()];
 		double *obj = new double[RES_POP.size()];
