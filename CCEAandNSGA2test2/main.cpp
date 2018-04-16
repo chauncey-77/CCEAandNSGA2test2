@@ -15,10 +15,10 @@ const double UPPBOUND = 1;   //自变量的取值范围（上限）
 const int F1_NVAR = 1;
 const int F2_NVAR = 29;
 const int IN_POP_SIZE = 100;
-const int OUT_POP_SIZE = 100;//200
+const int OUT_POP_SIZE = 200;//200
 const double P_CROSS = 0.5;
 const double P_MUTAT = 0.02;
-const int GENE_NUM = 500;
+const int GENE_NUM = 100;//500
 
 struct F1_INDIVIDUAL
 {
@@ -61,10 +61,6 @@ struct F2_POPULATION
 };
 struct F_INDIVIDUAL
 {
-	/*F1_INDIVIDUAL f1;
-	F2_INDIVIDUAL f2;*/
-	//double m_f1_var[F1_NVAR];
-	//double m_f2_var[F2_NVAR];
 	double m_f1_obj;
 	double m_f2_obj;
 };
@@ -82,98 +78,19 @@ int main()
 	srand(time(NULL));
 	F1_POPULATION f1_pop;
 	F2_POPULATION f2_pop;
-	f1_pop.initPopulation();
-	f2_pop.initPopulation();
-
 	F_INDIVIDUAL f_ind[IN_POP_SIZE][IN_POP_SIZE];
 	F_INDIVIDUAL f1_opt_objs[IN_POP_SIZE];
 	F_INDIVIDUAL f2_opt_objs[IN_POP_SIZE];
-	for (int i = 0; i < IN_POP_SIZE; ++i)
-	{
-		f1_pop.m_population[i].calObj();
-		for (int j = 0; j < IN_POP_SIZE; ++j)
-		{
-			f2_pop.m_population[j].f1 = f1_pop.m_population[i];
-			f2_pop.m_population[j].calObj();
-			f_ind[i][j].m_f1_obj = f1_pop.m_population[i].m_obj;
-			f_ind[i][j].m_f2_obj = f2_pop.m_population[j].m_obj;
-		}
-	}
-	for (int i = 0; i < IN_POP_SIZE; ++i)
-	{
-		int tmp = 0;
-		for (int j = 0; j < IN_POP_SIZE; ++j)
-		{
-			if (F_INDIVIDUAL_cmp(f_ind[i][j], f_ind[i][tmp]) == 1)
-			{
-				tmp = j;
-			}
-			else if (F_INDIVIDUAL_cmp(f_ind[i][tmp], f_ind[i][j]) == 3)
-			{
-				if (createZeroToOneRand() <= 0.5)
-				{
-					tmp = j;
-				}
-			}
-		}
-		f1_opt_objs[i].m_f1_obj = f_ind[i][tmp].m_f1_obj;
-		f1_opt_objs[i].m_f2_obj = f_ind[i][tmp].m_f2_obj;
-	}
-	for (int j = 0; j < IN_POP_SIZE; ++j)
-	{
-		int tmp = 0;
-		for (int i = 0; i < IN_POP_SIZE; ++i)
-		{
-			if (F_INDIVIDUAL_cmp(f_ind[i][j], f_ind[tmp][j]) == 1)
-			{
-				tmp = i;
-			}
-			else if (F_INDIVIDUAL_cmp(f_ind[tmp][j], f_ind[i][j]) == 3)
-			{
-				if (createZeroToOneRand() <= 0.5)
-				{
-					tmp = i;
-				}
-			}
-		}
-		f2_opt_objs[j].m_f1_obj = f_ind[tmp][j].m_f1_obj;
-		f2_opt_objs[j].m_f2_obj = f_ind[tmp][j].m_f2_obj;
-	}
-	for (int i = 0; i < IN_POP_SIZE; ++i)
-	{
-		int cnt1 = 0;
-		int cnt2 = 0;
-		for (int j = 0; j < IN_POP_SIZE; ++j)
-		{
-			if (F_INDIVIDUAL_cmp(f1_opt_objs[i], f1_opt_objs[j]) == 1)
-			{
-				cnt1++;
-				if (cnt1 == 1 && isCanAddToTmpPop(f1_opt_objs[i]) == true)
-				{
-					addToTmpPop(f1_opt_objs[i]);
-				}
-			}
-			if (F_INDIVIDUAL_cmp(f2_opt_objs[i], f2_opt_objs[j]) == 1)
-			{
-				cnt2++;
-				if (cnt2 == 1 && isCanAddToTmpPop(f2_opt_objs[i]) == true)
-				{
-					addToTmpPop(f2_opt_objs[i]);
-				}
-			}
-		}
-		f1_pop.m_population[i].m_fitness = cnt1;
-		f2_pop.m_population[i].m_fitness = cnt2;
-	}
-	addTmpPopToResPop();
+
+	f1_pop.initPopulation();
+	f2_pop.initPopulation();
+	RES_POP.clear();
 
 	while (RES_POP.size() <= OUT_POP_SIZE)
 	{
 		TMP_POP.clear();
-		for (int gene = 1; gene < GENE_NUM; ++gene)
+		for (int gene = 0; gene < GENE_NUM; ++gene)
 		{
-			f1_pop.geneticOperation();
-			f2_pop.geneticOperation();
 			for (int i = 0; i < IN_POP_SIZE; ++i)
 			{
 				f1_pop.m_population[i].calObj();
@@ -225,6 +142,31 @@ int main()
 				f2_opt_objs[j].m_f1_obj = f_ind[tmp][j].m_f1_obj;
 				f2_opt_objs[j].m_f2_obj = f_ind[tmp][j].m_f2_obj;
 			}
+
+			/*double dis[IN_POP_SIZE];
+			double obj[IN_POP_SIZE];
+			int idx[IN_POP_SIZE];
+			for (int i = 0; i < IN_POP_SIZE; ++i)
+			{
+				idx[i] = i;
+				dis[i] = 0;
+				obj[i] = f1_opt_objs[i].m_f1_obj;
+			}
+			mysort(idx, obj, IN_POP_SIZE);
+			dis[0] = 1.0e+30;
+			dis[IN_POP_SIZE - 1] = 1.0e+30;
+			for (int i = 1; i < IN_POP_SIZE - 1; ++i)
+			{
+				dis[i] = (f1_opt_objs[idx[i + 1]].m_f1_obj - f1_opt_objs[idx[i - 1]].m_f1_obj);
+			}
+			mysort(idx, dis, IN_POP_SIZE);
+			int fit = 0;
+			for (int i = IN_POP_SIZE - 1; i >= 0; --i)
+			{
+				f1_pop.m_population[idx[i]].m_fitness = fit;
+				fit++;
+			}*/
+
 			for (int i = 0; i < IN_POP_SIZE; ++i)
 			{
 				int cnt1 = 0;
@@ -239,6 +181,7 @@ int main()
 							addToTmpPop(f1_opt_objs[i]);
 						}
 					}
+
 					if (F_INDIVIDUAL_cmp(f2_opt_objs[i], f2_opt_objs[j]) == 1)
 					{
 						cnt2++;
@@ -251,10 +194,11 @@ int main()
 				f1_pop.m_population[i].m_fitness = cnt1;
 				f2_pop.m_population[i].m_fitness = cnt2;
 			}
+			f1_pop.geneticOperation();
+			f2_pop.geneticOperation();
 		}
 		addTmpPopToResPop();
 	}
-
 	if (RES_POP.size() > OUT_POP_SIZE)
 	{
 		double *dis = new double[RES_POP.size()];
@@ -288,8 +232,6 @@ int main()
 			RES_POP.push_back(tmpf[i]);
 		}
 	}
-
-
 	ofstream out("outdata.txt");
 	for (int i = 0; i < RES_POP.size(); ++i)
 	{
@@ -297,7 +239,10 @@ int main()
 	}
 	return 0;
 }
-
+/*double createZeroToOneRand()
+{
+	return rand() * 1.0 / RAND_MAX;
+}*/
 union FloatRand
 {
 	struct
@@ -311,7 +256,7 @@ union FloatRand
 };
 double createZeroToOneRand()
 {
-	/*union FloatRand r;
+	union FloatRand r;
 	r.BitArea.Signed = 0;
 	r.BitArea.Exp = 1;
 	r.BitArea.Frac = (rand() * rand()) % 0x800000;
@@ -321,10 +266,9 @@ double createZeroToOneRand()
 		r.BitArea.Exp = 0x7E;
 	else
 		r.BitArea.Exp = 0x7E;
-	return (double)(r.Value - 0.5)*2.0;*/
+	return (double)(r.Value - 0.5)*2.0;
 
 	//return rand() % 1000 / 1000.0;
-	return rand() * 1.0 / RAND_MAX;
 }
 
 void F1_INDIVIDUAL::calObj()
